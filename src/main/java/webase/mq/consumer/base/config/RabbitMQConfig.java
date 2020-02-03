@@ -48,83 +48,87 @@ import java.util.Map;
 public class RabbitMQConfig {
 
     /**
-     *
      * @param connectionFactory spring的yml中rabbitmq项配置
-     * @param config 单独的rabbitmq-queue的配置
      * @return
      */
-    @Bean
-    public RabbitAdmin initRabbitAdmin(ConnectionFactory connectionFactory, RabbitMQProperties config) {
-        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-        // bind queue which configured in yml
-        binding(rabbitAdmin, config.getQueueNames());
-        return rabbitAdmin;
-    }
-
     @Bean
     public RabbitTemplate getRabbitTemplate(ConnectionFactory connectionFactory) {
         return new RabbitTemplate(connectionFactory);
     }
 
-    @Bean
-    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(ConnectionFactory connectionFactory){
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(new Jackson2JsonMessageConverter());
-//        factory.setMessageConverter(new MessageConverter() {
-//            @Override
-//            public Message toMessage(Object object, MessageProperties messageProperties)
-//                    throws MessageConversionException {
-//                return null;
+//    /**
+//     *
+//     * @param connectionFactory spring的yml中rabbitmq项配置
+//     * @param config 单独的rabbitmq-queue的配置
+//     * @return
+//     */
+//    @Bean
+//    public RabbitAdmin initRabbitAdmin(ConnectionFactory connectionFactory, RabbitMQProperties config) {
+//        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+//        // bind queue which configured in yml
+//        binding(rabbitAdmin, config.getQueueNames());
+//        return rabbitAdmin;
+//    }
+//
+//    @Bean
+//    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(ConnectionFactory connectionFactory){
+//        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+//        factory.setConnectionFactory(connectionFactory);
+//        factory.setMessageConverter(new Jackson2JsonMessageConverter());
+////        factory.setMessageConverter(new MessageConverter() {
+////            @Override
+////            public Message toMessage(Object object, MessageProperties messageProperties)
+////                    throws MessageConversionException {
+////                return null;
+////            }
+////            @Override
+////            public Object fromMessage(Message message) throws MessageConversionException {
+////                try(ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(message.getBody())))
+////                {
+////                    return ois.readObject();
+////                }catch (Exception e){
+////                    e.printStackTrace();
+////                    return null;
+////                }
+////            }
+////        });
+//        return factory;
+//    }
+//
+//    private Map<String,List<String>> distinctList(List<String> list){
+//        Map<String,List<String>> map = new HashMap<>();
+//        for (String string :list){
+//            if(!string.contains(".")){
+//                continue;
 //            }
-//            @Override
-//            public Object fromMessage(Message message) throws MessageConversionException {
-//                try(ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(message.getBody())))
-//                {
-//                    return ois.readObject();
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                    return null;
-//                }
+//            List<String> list1 = new ArrayList<>();
+//            String key =string.split("\\.")[0];
+//            if(map.keySet().contains(key)){
+//                map.get(key).add(string);
+//            }else{
+//                list1.add(string);
+//                map.put(key,list1);
 //            }
-//        });
-        return factory;
-    }
-
-    private Map<String,List<String>> distinctList(List<String> list){
-        Map<String,List<String>> map = new HashMap<>();
-        for (String string :list){
-            if(!string.contains(".")){
-                continue;
-            }
-            List<String> list1 = new ArrayList<>();
-            String key =string.split("\\.")[0];
-            if(map.keySet().contains(key)){
-                map.get(key).add(string);
-            }else{
-                list1.add(string);
-                map.put(key,list1);
-            }
-        }
-        return map;
-    }
-
-    /**
-     * bind queue name for rabbitAdmin
-     * @param rabbitAdmin
-     * @param queueNames
-     */
-    private void  binding(RabbitAdmin rabbitAdmin, List<String> queueNames){
-        Map<String ,List<String>> map = distinctList(queueNames);
-        for (String string : map.keySet()){
-            FanoutExchange fanoutExchange = new FanoutExchange(string);
-            for(String string1 : map.get(string)){
-                Binding binding = BindingBuilder.bind(new Queue(string1)).to(fanoutExchange);
-                rabbitAdmin.declareQueue(new Queue(string1));
-                rabbitAdmin.declareExchange(fanoutExchange);
-                rabbitAdmin.declareBinding(binding);
-            }
-        }
-    }
+//        }
+//        return map;
+//    }
+//
+//    /**
+//     * bind queue name for rabbitAdmin
+//     * @param rabbitAdmin
+//     * @param queueNames
+//     */
+//    private void  binding(RabbitAdmin rabbitAdmin, List<String> queueNames){
+//        Map<String ,List<String>> map = distinctList(queueNames);
+//        for (String string : map.keySet()){
+//            FanoutExchange fanoutExchange = new FanoutExchange(string);
+//            for(String string1 : map.get(string)){
+//                Binding binding = BindingBuilder.bind(new Queue(string1)).to(fanoutExchange);
+//                rabbitAdmin.declareQueue(new Queue(string1));
+//                rabbitAdmin.declareExchange(fanoutExchange);
+//                rabbitAdmin.declareBinding(binding);
+//            }
+//        }
+//    }
 
 }

@@ -27,6 +27,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import webase.mq.consumer.rabbitmq.entity.BlockPushMessage;
 
+import java.util.Arrays;
+
 /**
  * TODO 通过factory动态设置listener的队列名
  * @author marsli
@@ -42,7 +44,6 @@ public class RabbitMQConsumer {
     /**
      * RabbitHandler handler通过消息体类型区分，同时Listener要注解在类上
      * Listener注解注解在方法上则按队列来监听
-     *
      * @param message
      */
 //    @RabbitListener(queues = "block_exchange.block_queue_1")
@@ -51,9 +52,13 @@ public class RabbitMQConsumer {
 //                message.getBody(),  message.getMessageProperties().getHeaders());
 //    }
 
+    /**
+     * 从queue中获取Message
+     * @param message string格式会转化为byte[]来传输
+     */
     @RabbitListener(queues = "block_exchange.block_queue_1")
-    public void receiveStr(String message) {
-        log.info("++++++++mq receive: {}", message);
+    public void receiveStr(byte[] message) {
+        log.info("++++++++mq receive: {}", new String(message));
 
     }
 }
